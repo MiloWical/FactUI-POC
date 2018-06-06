@@ -27,30 +27,25 @@
         public static void LoadScript(string script)
         {
             // Run the script.
-            Native.JsRunScript(script, _currentSourceContext++, "", out var result);
+            Native.JsRunScript(script, _currentSourceContext++, "", out var _);
         }
 
-        public static void Add(int a, int b, params int[] additionalAddends)
+        public static void Add(int a, int b)
         {
-            Add(JavaScriptValue.GlobalObject, a, b, additionalAddends);
+            Add(JavaScriptValue.GlobalObject, a, b);
         }
 
-        public static void Add(JavaScriptValue objectContext, int a, int b, params int[] additionalAddends)
+        public static void Add(JavaScriptValue objectContext, int a, int b)
         {
-            var arguments = new List<JavaScriptValue>
+            var jsArgs = new[]
             {
                 objectContext,
                 JavaScriptValue.FromInt32(a),
                 JavaScriptValue.FromInt32(b)
             };
 
-            if (additionalAddends != null && additionalAddends.Length > 0)
-                arguments.AddRange(additionalAddends.Select(JavaScriptValue.FromInt32));
-
-            var jsArgs = arguments.ToArray();
-
             Native.JsCallFunction(
-                JavaScriptValue.GlobalObject.GetProperty(JavaScriptPropertyId.FromString("add")), jsArgs,
+                objectContext.GetProperty(JavaScriptPropertyId.FromString("add")), jsArgs,
                 (ushort) jsArgs.Length, out var functionValue);
 
             Console.WriteLine(JsValueAsString(functionValue));
@@ -58,9 +53,14 @@
 
         public static void SayHello()
         {
+            SayHello(JavaScriptValue.GlobalObject);
+        }
+
+        public static void SayHello(JavaScriptValue objectContext)
+        {
             Native.JsCallFunction(
                 GetFunctionByName("helloWorld"),
-                new[] { JavaScriptValue.GlobalObject }, 1, out var functionValue);
+                new[] { objectContext }, 1, out var functionValue);
 
             Console.WriteLine(JsValueAsString(functionValue));
         }
