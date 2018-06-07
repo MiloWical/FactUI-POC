@@ -11,6 +11,7 @@
             HelloWorld.LoadScript(Scripts.Functions.BytesToString());
             HelloWorld.Add(15, 24);
             HelloWorld.SayHello();
+            HelloWorld.GetObjectProperty(@"{""foo"":42, ""bar"":""FU :-)"", ""data"":[2,4,6], ""lead"":{""""}", "data.length");
 
             Console.ReadKey();
         }

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Runtime.InteropServices;
     using ChakraCoreHost.Hosting;
 
@@ -55,7 +54,7 @@
         {
             SayHello(JavaScriptValue.GlobalObject);
         }
-
+        
         public static void SayHello(JavaScriptValue objectContext)
         {
             Native.JsCallFunction(
@@ -65,12 +64,41 @@
             Console.WriteLine(JsValueAsString(functionValue));
         }
 
-        public static JavaScriptValue GetFunctionByName(string name)
+        public static void GetObjectProperty(string jsonText, string property)
+        {
+            GetObjectProperty(JavaScriptValue.GlobalObject, jsonText, property);
+        }
+
+        public static void GetObjectProperty(JavaScriptValue objectContext, string jsonText, string property)
+        {
+            var jsonObject = JavaScriptValue.GlobalObject.GetProperty(
+                JavaScriptPropertyId.FromString("JSON"));
+            var parse = jsonObject.GetProperty(
+                JavaScriptPropertyId.FromString("parse"));
+
+            var stringInput = JavaScriptValue.FromString(jsonText);
+            var parsedInput = parse.CallFunction(JavaScriptValue.GlobalObject, stringInput);
+
+            var jsArgs = new[]
+            {
+                objectContext,
+                parsedInput,
+                JavaScriptValue.FromString(property)
+            };
+
+            Native.JsCallFunction(
+                objectContext.GetProperty(JavaScriptPropertyId.FromString("getProperty")), jsArgs,
+                (ushort)jsArgs.Length, out var functionValue);
+
+            Console.WriteLine(JsValueAsString(functionValue));
+        }
+
+        private static JavaScriptValue GetFunctionByName(string name)
         {
             return GetFunctionByName(name, JavaScriptValue.GlobalObject);
         }
 
-        public static JavaScriptValue GetFunctionByName(string name,
+        private static JavaScriptValue GetFunctionByName(string name,
             JavaScriptValue objectContext)
         {
             return objectContext.GetProperty(JavaScriptPropertyId.FromString(name));
